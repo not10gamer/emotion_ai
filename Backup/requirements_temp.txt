@@ -9,9 +9,6 @@ Flask-Limiter==3.5.0
 # AI and ML dependencies
 deepface==0.0.81
 google-generativeai==0.7.2
-tensorflow==2.15.1
-tf-keras==2.15.1
-mtcnn==0.1.0
 
 # Computer vision
 opencv-python-headless==4.10.0.84
@@ -26,6 +23,3 @@ requests==2.32.3
 # Caching and data storage
 redis==5.0.1
 psutil==5.9.6
-
-# Text-to-speech
-gTTS==2.5.1

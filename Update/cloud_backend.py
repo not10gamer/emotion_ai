@@ -99,6 +99,7 @@ def detect_emotion():
             new_height = int(height * ratio)
             frame = cv2.resize(frame, (new_width, new_height))
 
+        # Analyze emotion using deepface
         analysis = DeepFace.analyze(
             frame,
             actions=['emotion'],
@@ -107,17 +108,36 @@ def detect_emotion():
         )
 
         dominant_emotion = "neutral"
+        confidence_scores = {}
+
         if analysis and isinstance(analysis, list) and len(analysis) > 0:
-            dominant_emotion = analysis[0]['dominant_emotion']
+            emotion_data = analysis[0]
+            dominant_emotion_str = emotion_data['dominant_emotion']
+            confidence = emotion_data['emotion'][dominant_emotion_str]
+            
+            logger.info(f"Detected dominant emotion: {dominant_emotion_str} with confidence: {confidence:.2f}%")
+
+            # Only accept the emotion if the model is reasonably confident
+            if confidence > 75:
+                dominant_emotion = dominant_emotion_str
+                confidence_scores = emotion_data.get('emotion', {})
+                logger.info(f"Confidence threshold passed. Using emotion: {dominant_emotion}")
+            else:
+                logger.info(f"Confidence threshold not met. Defaulting to neutral.")
+                dominant_emotion = "neutral"
 
         processing_time = time.time() - start_time
         logger.info(f"Emotion detection completed in {processing_time:.2f}s: {dominant_emotion}")
 
-        return jsonify({"emotion": dominant_emotion})
+        return jsonify({
+            "emotion": dominant_emotion,
+            "confidence_scores": confidence_scores,
+            "processing_time": processing_time
+        })
 
     except Exception as e:
-        logger.error(f"Error during emotion detection: {e}", exc_info=True)
-        return jsonify({"error": "Internal server error during emotion detection"}), 500
+        logger.error(f"Error during emotion detection: {e}")
+        return jsonify({"error": "Internal server error"}), 500
 
 
 @app.route('/chat', methods=['POST'])

@@ -22,7 +22,7 @@ WORKDIR /app
 # Create a non-root user for security
 RUN groupadd -r appuser && useradd -r -g appuser appuser
 
-# Install runtime system dependencies, including curl for healthcheck
+# Install runtime system dependencies
 RUN apt-get update && apt-get install -y \
     libglib2.0-0 \
     libsm6 \
@@ -40,7 +40,8 @@ COPY --from=builder /root/.local /home/appuser/.local
 # Copy the application code
 COPY . .
 
-# Fix permissions for the appuser
+# Fix permissions for the appuser to prevent PermissionErrors
+# This allows deepface to create its .deepface cache directory
 RUN chown -R appuser:appuser /app /home/appuser
 
 # Switch to the non-root user
@@ -49,18 +50,14 @@ USER appuser
 # Add the user's local bin to the PATH so python can find packages
 ENV PATH=/home/appuser/.local/bin:$PATH
 
-# Preload models during build to improve startup time
+# Now run preloading as the appuser, who can find the packages and has permissions
 RUN python preload_models.py
 
 # Set environment variables for the running container
 ENV PYTHONUNBUFFERED=1
 ENV PORT=8080
 
-# Add a healthcheck to ensure the container is healthy
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:8080/health || exit 1
-
 EXPOSE 8080
 
-# Use standard gunicorn worker, not gevent
-CMD ["sh", "-c", "exec gunicorn --bind :$PORT --workers 2 --threads 4 --timeout 300 --access-logfile - --error-logfile - enhanced_backend:app"]
+# Use exec form for better signal handling
+CMD ["sh", "-c", "exec gunicorn --bind :$PORT --workers 2 --threads 2 --timeout 300 --access-logfile - --error-logfile - enhanced_backend:app"]

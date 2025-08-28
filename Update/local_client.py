@@ -7,7 +7,7 @@ import time
 
 # --- CONFIGURATION ---
 # IMPORTANT: Replace with the actual URL of your deployed cloud backend
-CLOUD_SERVER_URL = "https://emotion-chatbot-227351609312.asia-southeast2.run.app" # For local testing, use localhost. For cloud, use your server's public IP/domain
+CLOUD_SERVER_URL = "https://emotion-ai-mug7a7ejoa-uc.a.run.app" # For local testing, use localhost. For cloud, use your server's public IP/domain
 
 # How often to send frames for emotion detection (e.g., 15 means twice per second at 30 FPS)
 FRAME_SKIP = 15

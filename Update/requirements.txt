@@ -1,0 +1,10 @@
+Flask==2.3.3
+Flask-CORS==4.0.0
+deepface==0.0.81
+google-generativeai==0.7.2
+opencv-python-headless==4.10.0.84
+numpy==1.26.4
+gunicorn==22.0.0
+tensorflow==2.15.1
+requests==2.32.3
+tf-keras==2.15.1
